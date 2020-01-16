@@ -10,11 +10,11 @@ import (
 
 func FizzBuzzHandler(statsRepo StatisticsRepository) http.HandlerFunc {
 	type fizzBuzzRequest struct {
-		FizzMultiple int `json:"int1"`
-		BuzzMultiple int `json:"int2"`
-		Limit int `json:"limit"`
-		FizzStr string `json:"str1"`
-		BuzzStr string `json:"str2"`
+		FizzMultiple int    `json:"int1"`
+		BuzzMultiple int    `json:"int2"`
+		Limit        int    `json:"limit"`
+		FizzStr      string `json:"str1"`
+		BuzzStr      string `json:"str2"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -30,27 +30,28 @@ func FizzBuzzHandler(statsRepo StatisticsRepository) http.HandlerFunc {
 
 		fizzBuzzList := FizzBuzz(request.FizzMultiple, request.BuzzMultiple, request.Limit, request.FizzStr, request.BuzzStr)
 
-		err = statsRepo.store(Hit{request.FizzMultiple, request.BuzzMultiple, request.Limit, request.FizzStr, request.BuzzStr})
+		err = statsRepo.Store(Hit{request.FizzMultiple, request.BuzzMultiple, request.Limit, request.FizzStr, request.BuzzStr})
 		if err != nil {
 			log.Print(err)
 		}
 
+		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, strings.Join(fizzBuzzList, ","))
 	}
 }
 
-func StatsHander(statsRepo StatisticsRepository) http.HandlerFunc {
+func StatsHandler(statsRepo StatisticsRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type response struct {
-			FizzMultiple int `json:"int1"`
-			BuzzMultiple int `json:"int2"`
-			Limit int `json:"limit"`
-			FizzStr string `json:"str1"`
-			BuzzStr string `json:"str2"`
-			Count int `json:"count"`
+			FizzMultiple int    `json:"int1"`
+			BuzzMultiple int    `json:"int2"`
+			Limit        int    `json:"limit"`
+			FizzStr      string `json:"str1"`
+			BuzzStr      string `json:"str2"`
+			Count        int    `json:"count"`
 		}
 
-		hit, count, err := statsRepo.getMostUsedWithCount()
+		hit, count, err := statsRepo.GetMostUsedWithCount()
 		if err != nil {
 			log.Print(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,5 +64,6 @@ func StatsHander(statsRepo StatisticsRepository) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.WriteHeader(http.StatusOK)
 	}
 }

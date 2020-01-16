@@ -5,21 +5,20 @@ import "sync"
 type Hit struct {
 	fizzMultiple int
 	buzzMultiple int
-	limit int
-	fizzStr string
-	buzzStr string
+	limit        int
+	fizzStr      string
+	buzzStr      string
 }
 
-
 type StatisticsRepository interface {
-	store(hit Hit) error
-	getMostUsedWithCount() (Hit, int, error)
+	Store(hit Hit) error
+	GetMostUsedWithCount() (Hit, int, error)
 }
 
 type memoryStatisticsRepository struct {
-	hits map[Hit]int
-	mu sync.RWMutex
-	mostUsed Hit
+	hits          map[Hit]int
+	mu            sync.RWMutex
+	mostUsed      Hit
 	countMostUsed int
 }
 
@@ -27,7 +26,7 @@ func NewMemoryStatisticsRepository() StatisticsRepository {
 	return &memoryStatisticsRepository{hits: make(map[Hit]int)}
 }
 
-func (r *memoryStatisticsRepository) store(hit Hit) error {
+func (r *memoryStatisticsRepository) Store(hit Hit) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -42,9 +41,11 @@ func (r *memoryStatisticsRepository) store(hit Hit) error {
 		r.mostUsed = hit
 		r.countMostUsed = r.hits[hit]
 	}
+
+	return nil
 }
 
-func (r *memoryStatisticsRepository) getMostUsedWithCount() (Hit, int, error) {
+func (r *memoryStatisticsRepository) GetMostUsedWithCount() (Hit, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
